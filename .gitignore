@@ -1,0 +1,9 @@
+dados/
+runs/
+resultados/
+cenarios/
+demo/
+*.pt
+*.mp4
+__pycache__/
+.venv/

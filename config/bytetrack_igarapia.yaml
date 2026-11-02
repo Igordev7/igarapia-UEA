@@ -1,0 +1,9 @@
+# ByteTrack ajustado para resíduos flutuantes (base: configuração padrão da Ultralytics)
+# Docs: https://docs.ultralytics.com/modes/track
+tracker_type: bytetrack
+track_high_thresh: 0.25  # caixas acima disso entram na 1ª etapa de associação
+track_low_thresh: 0.1    # caixas entre 0,1 e 0,25 são usadas na 2ª etapa (objetos meio submersos)
+new_track_thresh: 0.25   # confiança mínima para criar um novo identificador
+track_buffer: 60         # quadros que um objeto pode "sumir" sem perder o ID (60 = 2 s a 30 qps)
+match_thresh: 0.8        # limiar de associação por IoU
+fuse_score: True         # combina a confiança com o IoU na associação

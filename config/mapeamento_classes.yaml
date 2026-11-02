@@ -1,0 +1,41 @@
+# Classes do IgarapIA (a ordem define o índice usado pelo YOLO)
+classes:
+  - garrafa_plastica        # 0
+  - sacola_filme_plastico   # 1
+  - isopor                  # 2
+  - lata_metal              # 3
+  - outros_residuos         # 4
+
+# Como converter as classes de cada base pública para as classes acima.
+# - mapa: nome da classe na base de origem -> classe do IgarapIA (null = ignorar o objeto)
+# - padrao: classe usada para nomes que não estão no mapa (null = ignorar)
+# - usar_supercategoria: na TACO, usa a supercategoria do COCO em vez da categoria fina
+#
+# Rode o 02_converter_anotacoes.py uma vez: ele lista as classes encontradas na base
+# e quantas caixas de cada uma. Ajuste o mapa abaixo com esses nomes, se precisar.
+fontes:
+  taco:
+    usar_supercategoria: true
+    padrao: outros_residuos
+    mapa:
+      "Bottle": garrafa_plastica          # inclui garrafas de vidro na TACO
+      "Plastic container": garrafa_plastica
+      "Plastic bag & wrapper": sacola_filme_plastico
+      "Styrofoam piece": isopor
+      "Can": lata_metal
+      "Scrap metal": lata_metal
+      "Food waste": null                  # matéria orgânica: não é alvo do projeto
+      "Cigarette": null                   # pequeno demais para câmera em ponte
+      "Pop tab": null
+      "Bottle cap": null
+
+  uavvaste:
+    usar_supercategoria: false
+    padrao: outros_residuos               # a UAVVaste tem uma única classe genérica
+    mapa: {}
+
+  flow:
+    usar_supercategoria: false
+    padrao: outros_residuos               # confira os nomes impressos pelo conversor
+    mapa:
+      "bottle": garrafa_plastica
