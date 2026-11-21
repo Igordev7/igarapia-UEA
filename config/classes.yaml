@@ -1,0 +1,31 @@
+# Classes usadas pelo IgarapIA e mapeamento a partir das categorias oficiais do TACO.
+# Qualquer categoria do TACO que não aparece abaixo vai para "outros".
+classes:
+  - garrafa_pet
+  - sacola_filme_plastico
+  - isopor
+  - lata
+  - outros
+
+mapeamento_taco:
+  garrafa_pet:
+    - Clear plastic bottle
+    - Other plastic bottle
+  sacola_filme_plastico:
+    - Plastic film
+    - Garbage bag
+    - Single-use carrier bag
+    - Polypropylene bag
+    - Other plastic wrapper
+    - Crisp packet
+  isopor:
+    - Styrofoam piece
+    - Foam cup
+    - Foam food container
+  lata:
+    - Drink can
+    - Food Can
+    - Aerosol
+
+# Categorias do TACO descartadas (não entram no treino).
+ignorar_taco: []
