@@ -14,6 +14,10 @@ import cv2
 EXT_IMAGEM = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 EXT_VIDEO = {".mp4", ".avi", ".mov", ".mkv", ".m4v"}
 
+# configuração do ByteTrack ajustada para objetos flutuantes (cai na padrão se o arquivo não existir)
+_cfg = Path(__file__).resolve().parents[1] / "config" / "bytetrack_igarapia.yaml"
+RASTREADOR = str(_cfg) if _cfg.exists() else "bytetrack.yaml"
+
 CAMPOS_HISTORICO = ["data_analise", "local", "fonte", "tipo", "classe", "quantidade"]
 
 
@@ -45,9 +49,15 @@ def carregar_modelo(caminho: str):
     return YOLO(caminho)
 
 
-def analisar_imagem(modelo, caminho: str, pasta_saida: str, conf: float = 0.25, local: str = "") -> Resultado:
-    """Detecta resíduos em uma imagem e conta os itens por classe."""
-    r = modelo.predict(caminho, conf=conf, verbose=False)[0]
+def analisar_imagem(modelo, caminho: str, pasta_saida: str, conf: float = 0.25, local: str = "",
+                    imgsz: int = 640, agnostico: bool = True, tta: bool = False) -> Resultado:
+    """Detecta resíduos em uma imagem e conta os itens por classe.
+
+    agnostico=True faz a supressão de caixas sem olhar a classe: o mesmo objeto não recebe
+    duas caixas de classes diferentes (por exemplo, "lata" e "garrafa_pet" na mesma garrafa).
+    tta=True analisa também versões espelhadas e redimensionadas da imagem (mais lento, costuma achar mais objetos).
+    """
+    r = modelo.predict(caminho, conf=conf, imgsz=imgsz, agnostic_nms=agnostico, augment=tta, verbose=False)[0]
     nomes = r.names
     res = Resultado(fonte=os.path.basename(caminho), tipo="imagem", local=local, quadros_processados=1)
     for cls, cf, xyxy in zip(r.boxes.cls.tolist(), r.boxes.conf.tolist(), r.boxes.xyxy.tolist()):
@@ -63,7 +73,7 @@ def analisar_imagem(modelo, caminho: str, pasta_saida: str, conf: float = 0.25, 
 
 
 def analisar_video(modelo, caminho: str, pasta_saida: str, conf: float = 0.25, local: str = "",
-                   passo: int = 1, ao_progredir=None) -> Resultado:
+                   passo: int = 1, ao_progredir=None, imgsz: int = 640, agnostico: bool = True) -> Resultado:
     """Rastreia os resíduos ao longo do vídeo; cada objeto é contado uma única vez (pelo ID de rastreamento)."""
     cap = cv2.VideoCapture(caminho)
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 0
@@ -80,7 +90,8 @@ def analisar_video(modelo, caminho: str, pasta_saida: str, conf: float = 0.25, l
         if not ok:
             break
         if i % passo == 0:
-            r = modelo.track(quadro, conf=conf, persist=True, tracker="bytetrack.yaml", verbose=False)[0]
+            r = modelo.track(quadro, conf=conf, imgsz=imgsz, agnostic_nms=agnostico, persist=True,
+                             tracker=RASTREADOR, verbose=False)[0]
             nomes = r.names
             ids = r.boxes.id.int().tolist() if r.boxes.id is not None else [None] * len(r.boxes)
             for oid, cls, cf, xyxy in zip(ids, r.boxes.cls.tolist(), r.boxes.conf.tolist(), r.boxes.xyxy.tolist()):

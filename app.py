@@ -31,6 +31,11 @@ with st.sidebar:
     conf = st.slider("Confiança mínima", 0.05, 0.90, 0.25, 0.05)
     local = st.text_input("Local (igarapé ou trecho)", "Teste com imagem do TACO")
     passo = st.number_input("Vídeo: analisar 1 a cada N quadros", 1, 30, 3)
+    imgsz = st.select_slider("Tamanho da imagem na análise", [512, 640, 960, 1280], 640,
+                             help="Valores maiores ajudam a achar objetos pequenos, mas deixam a análise mais lenta.")
+    agnostico = st.checkbox("Uma única classe por objeto", True,
+                            help="Evita que o mesmo objeto receba duas caixas de classes diferentes.")
+    tta = st.checkbox("Análise reforçada em fotos (mais lenta)", False)
 
 aba_analise, aba_historico = st.tabs(["Analisar imagem ou vídeo", "Histórico"])
 
@@ -48,10 +53,12 @@ with aba_analise:
         if tipo_da_fonte(str(caminho)) == "video":
             barra = st.progress(0.0, "Processando vídeo...")
             res = analisar_video(modelo, str(caminho), str(PASTA_RESULTADOS), conf, local, int(passo),
-                                 ao_progredir=lambda p: barra.progress(p, "Processando vídeo..."))
+                                 ao_progredir=lambda p: barra.progress(p, "Processando vídeo..."),
+                                 imgsz=int(imgsz), agnostico=agnostico)
             barra.empty()
         else:
-            res = analisar_imagem(modelo, str(caminho), str(PASTA_RESULTADOS), conf, local)
+            res = analisar_imagem(modelo, str(caminho), str(PASTA_RESULTADOS), conf, local,
+                                  imgsz=int(imgsz), agnostico=agnostico, tta=tta)
         resumo = salvar_resultado(res, str(PASTA_RESULTADOS), str(HISTORICO))
 
         col1, col2 = st.columns([3, 2])

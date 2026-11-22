@@ -16,8 +16,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dados", required=True, help="data.yaml gerado pelo preparar_taco.py")
-    ap.add_argument("--modelo", default="yolo11n.pt", help="pesos pré-treinados de partida")
-    ap.add_argument("--epocas", type=int, default=60)
+    ap.add_argument("--modelo", default="yolo11s.pt", help="yolo11s.pt (recomendado com GPU) ou yolo11n.pt (mais leve)")
+    ap.add_argument("--epocas", type=int, default=100)
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--lote", type=int, default=16)
     ap.add_argument("--dispositivo", default=None, help="'cpu', '0' (GPU) ou vazio para automático")
@@ -29,7 +29,8 @@ def main():
     modelo.train(data=a.dados, epochs=a.epocas, imgsz=a.imgsz, batch=a.lote, device=a.dispositivo,
                  patience=a.paciencia, project=str(RAIZ / "treinos"), name=a.nome, exist_ok=True,
                  # aumentos de dados que simulam reflexo, variação de luz e orientação na água
-                 hsv_v=0.5, hsv_s=0.6, fliplr=0.5, flipud=0.2, degrees=10, mosaic=1.0)
+                 hsv_v=0.5, hsv_s=0.6, fliplr=0.5, flipud=0.2, degrees=10, mosaic=1.0,
+                 mixup=0.1, close_mosaic=10, cos_lr=True)
     melhor = RAIZ / "treinos" / a.nome / "weights" / "best.pt"
     destino = RAIZ / "modelos" / "igarapia_best.pt"
     destino.parent.mkdir(exist_ok=True)
